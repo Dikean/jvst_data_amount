@@ -12,6 +12,7 @@ const healthyController = require('./routes/users/healthy_conditions/healthyCont
 const referencesController = require('./routes/users/References/referencesController');
 
 
+
 const app = express();
 
 // Settings
@@ -34,6 +35,7 @@ app.use(contactsController);
 app.use(familyController);
 app.use(healthyController);
 app.use(referencesController);
+// Conexión a la base de datos
 
 // Iniciar el servidor
 app.listen(app.get('port'), () => {
