@@ -60,7 +60,7 @@ router.post('/api/amount', (req, res) => {
     try {
       const query = 'SELECT * FROM consignments WHERE users_id = ?';
       const results = await db.query(query, [userId]);
-      res.status(200).json(results);
+      res.status(200).json(results[0][0]);
     } catch (error) {
       console.error('Error en la consulta SQL:', error);
       res.status(500).json({ error: 'Error al obtener datos de la base de datos', details: error });
