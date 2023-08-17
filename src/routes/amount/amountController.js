@@ -2,18 +2,19 @@ const { Router } = require('express');
 const db = require('../../db'); // Ajusta la ruta según tu estructura
 const router = Router();
 
-// Obtener todos los consignments
-router.get('/api/amount', (req, res) => {
+// Obtener todos los consignments //ok
 
-   const query = 'SELECT * FROM consignments';
-   db.query(query, (err, results) => {
-     if (err) {
-       res.status(500).json({ error: 'Error al obtener datos de la base de datos' });
-     } else {
-       res.status(200).json(results);
-   }
-   });
+router.get('/api/amount', async (req, res) => {
+  try {
+    const query = 'SELECT * FROM consignments';
+    const [results, fields] = await db.query(query); // Utiliza db.promise().query() para trabajar con promesas
+    res.status(200).json(results);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Error al obtener datos de la base de datos' });
+  }
 });
+
 
 // Crear un nuevo consignments
 router.post('/api/amount', (req, res) => {
@@ -33,70 +34,71 @@ router.post('/api/amount', (req, res) => {
   });
 
 // Eliminar un consignments por su ID
-router.delete('/api/amount/:id', (req, res) => {
+ router.delete('/api/amount/:id', async (req, res) => {
     const fileId = req.params.id;
-
-   
   
-    const query = 'DELETE FROM consignments WHERE id = ?';
-     db.query(query, [fileId], (err, result) => {
-       if (err) {
-         console.log('Error en la consulta SQL:', err);
-         res.status(500).json({ error: 'Error al eliminar el documento', details: err });
-       } else {
-         res.status(200).json({ message: 'Documento eliminado exitosamente' });
-       }
-     });
-
+    try {
+      const query = 'DELETE FROM consignments WHERE id = ?';
+      const result = await db.query(query, [fileId]);
+      
+      if (result[0].affectedRows === 0) {
+        res.status(404).json({ error: 'amount no encontrado' });
+      } else {
+        res.status(200).json({ message: 'amount eliminado exitosamente' });
+      }
+    } catch (error) {
+      console.error('Error en la consulta SQL:', error);
+      res.status(500).json({ error: 'Error al eliminar el amount', details: error });
+    }
   });
   
 
   // Obtener consignments8 de un usuario específico
-router.get('/api/amount/:id/amount', (req, res) => {
+  router.get('/api/amount/:id/amount', async (req, res) => {
     const userId = req.params.id;
-    const query = 'SELECT * FROM consignments WHERE users_id = ?';
-    db.query(query, [userId], (err, results) => {
-      if (err) {
-        res.status(500).json({ error: 'Error al obtener datos de la base de datos' });
-      } else {
-        res.status(200).json(results);
-      }
-    });
+  
+    try {
+      const query = 'SELECT * FROM consignments WHERE users_id = ?';
+      const results = await db.query(query, [userId]);
+      res.status(200).json(results);
+    } catch (error) {
+      console.error('Error en la consulta SQL:', error);
+      res.status(500).json({ error: 'Error al obtener datos de la base de datos', details: error });
+    }
   });
-
- // Obtener la suma total de los montos de consignaciones de Bancolombia
-router.get('/api/amount/bancolombia/total', (req, res) => {
-
- 
-   const bankName = 'bancolombia'; // Cambia esto según cómo esté almacenado el nombre del banco en tu base de datos
-
-   const query = 'SELECT SUM(amount) AS totalAmount FROM consignments WHERE bank = ?';
-   db.query(query, [bankName], (err, result) => {
-     if (err) {
-       res.status(500).json({ error: 'Error al obtener datos de la base de datos' });
-     } else {
-       const totalAmount = result[0].totalAmount;
-       res.status(200).json({ totalAmount });
-     }
-   });
-});
-
-// Obtener la suma total de los montos de consignaciones de Nequi
-router.get('/api/amount/nequi/total', (req, res) => {
   
 
- 
-  const bankName = 'nequi'; // Cambia esto según cómo esté almacenado el nombre del banco en tu base de datos
+ // Obtener la suma total de los montos de consignaciones de Bancolombia //ok
+ router.get('/api/amount/bancolombia/total', async (req, res) => {
+  try {
+    const bankName = 'bancolombia'; // Cambia esto según cómo esté almacenado el nombre del banco en tu base de datos
 
-   const query = 'SELECT SUM(amount) AS totalAmount FROM consignments WHERE bank = ?';
-   db.query(query, [bankName], (err, result) => {
-     if (err) {
-       res.status(500).json({ error: 'Error al obtener datos de la base de datos' });
-     } else {
-       const totalAmount = result[0].totalAmount;
-       res.status(200).json({ totalAmount });
-     }
-   });
+    const query = 'SELECT SUM(amount) AS totalAmount FROM consignments WHERE bank = ?';
+    const result = await db.query(query, [bankName]);
+
+    const totalAmount = result[0][0].totalAmount;
+    res.status(200).json({totalAmount});
+  } catch (error) {
+    console.error('Error en la consulta SQL:', error);
+    res.status(500).json({ error: 'Error al obtener datos de la base de datos', details: error });
+  }
+});
+
+
+// Obtener la suma total de los montos de consignaciones de Nequi //ok
+router.get('/api/amount/nequi/total', async (req, res) => {
+  try {
+    const bankName = 'nequi'; // Cambia esto según cómo esté almacenado el nombre del banco en tu base de datos
+
+    const query = 'SELECT SUM(amount) AS totalAmount FROM consignments WHERE bank = ?';
+    const result = await db.query(query, [bankName]);
+
+    const totalAmount = result[0][0].totalAmount;
+    res.status(200).json({totalAmount});
+  } catch (error) {
+    console.error('Error en la consulta SQL:', error);
+    res.status(500).json({ error: 'Error al obtener datos de la base de datos', details: error });
+  }
 });
 
 
