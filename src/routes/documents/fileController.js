@@ -16,28 +16,33 @@ router.get('/api/file', async (req, res) => {
 
 // Crear un nuevo documento CIS & File
 router.post('/api/file', async (req, res) => {
-  const { file, date, description, users_id } = req.body;
+  const { files, date, users_id } = req.body;
 
   try {
-    // Verificar si el usuario ya ha subido un documento con la misma descripción
-    const queryCheck = `SELECT COUNT(*) AS documentCount FROM documents WHERE users_id = ? AND description = ?`;
-    const [checkResults] = await db.query(queryCheck, [users_id, description]);
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      const description = `File${i + 1}`; // Generar descripción personalizada
 
-    const documentCount = checkResults[0].documentCount;
+      // Verificar si el usuario ya ha subido un documento con la misma descripción
+      const queryCheck = `SELECT COUNT(*) AS documentCount FROM documents WHERE users_id = ? AND description = ?`;
+      const [checkResults] = await db.query(queryCheck, [users_id, description]);
 
-    // Verificar si el usuario puede subir más documentos con esta descripción
-    if (documentCount >= 1) {
-      return res.status(400).json({ error: 'No se pueden subir más documentos con esta descripción' });
+      const documentCount = checkResults[0].documentCount;
+
+      // Verificar si el usuario puede subir más documentos con esta descripción
+      if (documentCount >= 1) {
+        return res.status(400).json({ error: 'No se pueden subir más documentos con esta descripción' });
+      }
+
+      // Insertar el nuevo documento en la base de datos
+      const query = `INSERT INTO documents (file, date, description, users_id) VALUES (?, ?, ?, ?)`;
+      await db.query(query, [file.url, date, description, users_id]);
     }
 
-    // Insertar el nuevo documento en la base de datos
-    const query = `INSERT INTO documents (file, date, description, users_id) VALUES (?, ?, ?, ?)`;
-    await db.query(query, [file, date, description, users_id]);
-
-    res.status(201).json({ message: 'Documento creado exitosamente' });
+    res.status(201).json({ message: 'Documentos creados exitosamente' });
   } catch (error) {
     console.error('Error en la consulta SQL:', error);
-    res.status(500).json({ error: 'Error al crear un nuevo documento', details: error });
+    res.status(500).json({ error: 'Error al crear nuevos documentos', details: error });
   }
 });
 
