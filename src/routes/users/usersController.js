@@ -28,24 +28,33 @@ router.get('/api/users', async (req, res) => {
 router.post('/api/users', async (req, res) => {
   const { name, lastname, email, password, role, address, postal_code, city, country, date, about_me } = req.body;
 
-// Dentro de la función router.post('/api/users', ...)
-try {
-  const hashedPassword = await bcrypt.hash(password, 10); // "10" es el número de rondas de hashing
+  try {
+    const hashedPassword = await bcrypt.hash(password, 10); // "10" es el número de rondas de hashing
 
-  const query = `
-    INSERT INTO users (name, lastname, email, password, role, address, postal_code, city, country, date, about_me)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-  `;
+    const query = `
+      INSERT INTO users (name, lastname, email, password, role, address, postal_code, city, country, date, about_me)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `;
 
-  await db.query(query, [name, lastname, email, hashedPassword, role, address, postal_code, city, country, date, about_me]);
-  
-  res.status(201).json({ message: 'Usuario creado exitosamente' });
-} catch (error) {
-  console.error('Error al insertar usuario:', error);
-  res.status(500).json({ error: 'Error al insertar usuario' });
-}
+    await db.query(query, [name, lastname, email, hashedPassword, role, address, postal_code, city, country, date, about_me]);
 
+    // Obtener el ID del usuario recién creado
+    const idQuery = 'SELECT LAST_INSERT_ID() as id';
+    const [idResult] = await db.query(idQuery);
+    const userId = idResult[0].id;
+
+    res.status(201).json({
+      message: 'Usuario creado exitosamente',
+      id: userId,
+      role: role,
+      email: email
+    });
+  } catch (error) {
+    console.error('Error al insertar usuario:', error);
+    res.status(500).json({ error: 'Error al insertar usuario' });
+  }
 });
+
 
 // Recuperar contraseña
 router.post('/api/forgot-password', async (req, res) => {
