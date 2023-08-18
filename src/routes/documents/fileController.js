@@ -79,13 +79,17 @@ router.get('/api/file/:id/file', async(req, res) => {
     });
   });
 
-  // Obtener documentos de un usuario específico con la descripción "CIS"
+  // Obtener documentos de un usuario específico con la descripción "CIS" //ok
   router.get('/api/file/:id/file/cis', async (req, res) => {
     const userId = req.params.id;
     const query = 'SELECT * FROM documents WHERE users_id = ? AND description = "CIS"';
   
+    
     try {
       const [results] = await db.query(query, [userId]);
+      if (results.length === 0) {
+        return res.status(200).json({ message: 'Usuario no existe' });
+      }
       res.status(200).json(results);
     } catch (error) {
       console.error('Error al obtener datos de la base de datos:', error);
@@ -94,19 +98,23 @@ router.get('/api/file/:id/file', async(req, res) => {
   });
 
 
-   // Obtener documentos de un usuario específico con la descripción "CIS"
+   // Obtener documentos de un usuario específico con la descripción "File" //ok
    router.get('/api/file/:id/file/file', async (req, res) => {
     const userId = req.params.id;
     const query = 'SELECT * FROM documents WHERE users_id = ? AND description = "File"';
-  
+    
     try {
       const [results] = await db.query(query, [userId]);
+      if (results.length === 0) {
+        return res.status(200).json({ message: 'Usuario no existe' });
+      }
       res.status(200).json(results);
     } catch (error) {
       console.error('Error al obtener datos de la base de datos:', error);
       res.status(500).json({ error: 'Error al obtener datos de la base de datos' });
     }
   });
+  
 
 
 
