@@ -84,6 +84,21 @@ router.post('/api/forgot-password', async (req, res) => {
   }
 });
 
+// Cambiar el rol de un usuario
+router.put('/api/users/:id/change-role', async (req, res) => {
+  const userId = req.params.id;
+  const { role } = req.body;
+
+  try {
+    const updateQuery = 'UPDATE users SET role = ? WHERE id = ?';
+    await db.query(updateQuery, [role, userId]);
+
+    res.status(200).json({ message: 'Rol de usuario actualizado exitosamente' });
+  } catch (error) {
+    console.error('Error al actualizar el rol del usuario:', error);
+    res.status(500).json({ error: 'Error al actualizar el rol del usuario' });
+  }
+});
 
 module.exports = router;
 

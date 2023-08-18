@@ -36,7 +36,7 @@ router.post('/api/file', async (req, res) => {
 
       // Insertar el nuevo documento en la base de datos
       const query = `INSERT INTO documents (file, date, description, users_id) VALUES (?, ?, ?, ?)`;
-      await db.query(query, [file.url, date, description, users_id]);
+      await db.query(query, [file, date, description, users_id]);
     }
 
     res.status(201).json({ message: 'Documentos creados exitosamente' });
@@ -45,6 +45,7 @@ router.post('/api/file', async (req, res) => {
     res.status(500).json({ error: 'Error al crear nuevos documentos', details: error });
   }
 });
+
 
 // Eliminar un documento por su ID //ok
 router.delete('/api/file/:id', async (req, res) => {
@@ -96,21 +97,45 @@ router.get('/api/file/:id/file', async(req, res) => {
 
 
    // Obtener documentos de un usuario específico con la descripción "File" //ok
-   router.get('/api/file/:id/file/file', async (req, res) => {
+   router.get('/api/file/:id/files', async (req, res) => {
     const userId = req.params.id;
-    const query = 'SELECT * FROM documents WHERE users_id = ? AND description = "File"';
-    
+    const descriptions = ["File1", "File2", "File3", "File4", "File5"];
+  
     try {
-      const [results] = await db.query(query, [userId]);
-      if (results.length === 0) {
-        return res.status(200).json({ message: 'Usuario no existe' });
-      }
-      res.status(200).json(results);
+      const filesData = await Promise.all(
+        descriptions.map(async (description) => {
+          const query = `
+            SELECT 
+              file
+            FROM 
+              documents 
+            WHERE 
+              description = ? 
+              AND users_id = ?
+            ORDER BY 
+              date DESC
+            LIMIT 1`;
+            
+          const [results] = await db.query(query, [description, userId]);
+          const fileData = results[0];
+          const url = `blob:${process.env.CLIENT_URL}/${fileData.file}`; // Assuming CLIENT_URL is your client's URL
+          return { url, date: fileData.date };
+        })
+      );
+  
+      const responseData = {
+        files: filesData,
+        date: new Date().toISOString().split('T')[0],
+        users_id: userId,
+      };
+  
+      res.status(200).json(responseData);
     } catch (error) {
-      console.error('Error al obtener datos de la base de datos:', error);
-      res.status(500).json({ error: 'Error al obtener datos de la base de datos' });
+      console.error('Error al obtener archivos de la base de datos:', error);
+      res.status(500).json({ error: 'Error al obtener archivos de la base de datos' });
     }
   });
+  
   
 
 
