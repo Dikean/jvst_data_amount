@@ -77,7 +77,7 @@ router.post('/api/amount', (req, res) => {
     const result = await db.query(query, [bankName]);
 
     const totalAmount = result[0][0].totalAmount;
-    res.status(200).json({totalAmount});
+    res.status(200).json(totalAmount);
   } catch (error) {
     console.error('Error en la consulta SQL:', error);
     res.status(500).json({ error: 'Error al obtener datos de la base de datos', details: error });
@@ -94,7 +94,7 @@ router.get('/api/amount/nequi/total', async (req, res) => {
     const result = await db.query(query, [bankName]);
 
     const totalAmount = result[0][0].totalAmount;
-    res.status(200).json({totalAmount});
+    res.status(200).json(totalAmount);
   } catch (error) {
     console.error('Error en la consulta SQL:', error);
     res.status(500).json({ error: 'Error al obtener datos de la base de datos', details: error });
