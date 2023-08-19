@@ -3,15 +3,15 @@ const db = require('../../../db'); // Ajusta la ruta según tu estructura
 const router = Router();
 
 // Obtener todos los family
-router.get('/api/family', (req, res) => {
-  const query = 'SELECT * FROM family_infos';
-  db.query(query, (err, results) => {
-    if (err) {
-      res.status(500).json({ error: 'Error al obtener datos de la base de datos' });
-    } else {
-      res.status(200).json(results);
-    }
-  });
+router.get('/api/family', async (req, res) => {
+  try {
+    const query = 'SELECT * FROM family_infos';
+    const [results, fields] = await db.query(query);
+    res.status(200).json(results);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Error al obtener datos de la base de datos' });
+  }
 });
 
 // Crear un nuevo family
