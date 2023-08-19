@@ -19,20 +19,21 @@ router.post('/api/file', async (req, res) => {
   const { files, date, users_id } = req.body;
 
   try {
+    // Verificar si el usuario ya ha subido un documento con la descripción "CIS"
+    const queryCheck = `SELECT COUNT(*) AS documentCount FROM documents WHERE users_id = ? AND description = 'CIS'`;
+    const [checkResults] = await db.query(queryCheck, [users_id]);
+
+    const documentCount = checkResults[0].documentCount;
+
+    // Verificar si el usuario puede subir más documentos con la descripción "CIS"
+    if (documentCount >= 1) {
+      return res.status(400).json({ error: 'No se pueden subir más documentos con la descripción CIS' });
+    }
+
+    // Si no existe un documento con la descripción "CIS" para este usuario, se permite agregar uno nuevo
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
-      const description = `File${i + 1}`; // Generar descripción personalizada
-
-      // Verificar si el usuario ya ha subido un documento con la misma descripción
-      const queryCheck = `SELECT COUNT(*) AS documentCount FROM documents WHERE users_id = ? AND description = ?`;
-      const [checkResults] = await db.query(queryCheck, [users_id, description]);
-
-      const documentCount = checkResults[0].documentCount;
-
-      // Verificar si el usuario puede subir más documentos con esta descripción
-      if (documentCount >= 1) {
-        return res.status(400).json({ error: 'No se pueden subir más documentos con esta descripción' });
-      }
+      const description = 'CIS'; // Descripción fija
 
       // Insertar el nuevo documento en la base de datos
       const query = `INSERT INTO documents (file, date, description, users_id) VALUES (?, ?, ?, ?)`;
@@ -45,6 +46,7 @@ router.post('/api/file', async (req, res) => {
     res.status(500).json({ error: 'Error al crear nuevos documentos', details: error });
   }
 });
+
 
 
 // Eliminar un documento por su ID //ok
