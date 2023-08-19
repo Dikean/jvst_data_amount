@@ -8,6 +8,38 @@ const router = Router();
 const nodemailer = require('nodemailer'); // Para enviar correos electrónicos
 const randomstring = require('randomstring'); // Para generar una contraseña temporal
 
+// Ruta para iniciar sesión
+router.post('/api/auth', async (req, res) => {
+  const { email, password } = req.body;
+
+  try {
+    // Busca al usuario en la base de datos por su correo electrónico
+    const userQuery = 'SELECT * FROM users WHERE email = ?';
+    const [userResults] = await db.query(userQuery, [email]);
+
+    if (userResults.length === 0) {
+      return res.status(401).json({ error: 'Credenciales incorrectas' });
+    }
+
+    // Compara la contraseña proporcionada con la almacenada en la base de datos
+    const user = userResults[0];
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+
+    if (!isPasswordValid) {
+      return res.status(401).json({ error: 'Credenciales incorrectas' });
+    }
+
+    // Genera un token JWT para el usuario
+    const token = jwt.sign({ id: user.id,name: user.name, email: user.email , role: user.role}, 'tu_secreto_secreto', {
+      expiresIn: '3h', // Puedes ajustar la duración del token
+    });
+
+    res.status(200).json({ message: 'Inicio de sesión exitoso', user, token });
+  } catch (error) {
+    console.error('Error al iniciar sesión:', error);
+    res.status(500).json({ error: 'Error al iniciar sesión' });
+  }
+});
 
 // Obtener todos los usuarios
 router.get('/api/users', async (req, res) => {
@@ -20,8 +52,6 @@ router.get('/api/users', async (req, res) => {
     res.status(500).json({ error: 'Error al obtener datos de la base de datos' });
   }
 });
-
-
 
 
 // Ruta para crear un nuevo usuario
@@ -54,7 +84,6 @@ router.post('/api/users', async (req, res) => {
     res.status(500).json({ error: 'Error al insertar usuario' });
   }
 });
-
 
 // Recuperar contraseña
 router.post('/api/forgot-password', async (req, res) => {
@@ -108,6 +137,7 @@ router.put('/api/users/:id/change-role', async (req, res) => {
     res.status(500).json({ error: 'Error al actualizar el rol del usuario' });
   }
 });
+
 
 module.exports = router;
 
