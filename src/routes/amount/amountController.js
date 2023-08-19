@@ -17,21 +17,28 @@ router.get('/api/amount', async (req, res) => {
 
 
 // Crear un nuevo consignments
-router.post('/api/amount', (req, res) => {
-    const { date, amount, bank, voucher, users_id } = req.body;
-  
+router.post('/api/amount', async (req, res) => {
+  const { date, amount, bank, voucher, users_id } = req.body;
 
-    const query = `INSERT INTO consignments (date, amount, bank, voucher, users_id) VALUES (?, ?, ?, ?, ?)`;
-     db.query(query, [date, amount, bank, voucher, users_id], (err, result) => {
-       if (err) {
-         console.log('Error en la consulta SQL:', err);
-         res.status(500).json({ error: 'Error al crear un nuevo documento', details: err });
-       } else {
-         res.status(201).json({ message: 'Documento creado exitosamente' });
-       }
-     });
-    
-  });
+  try {
+    const query = `
+      INSERT INTO consignments (date, amount, bank, voucher, users_id)
+      VALUES (?, ?, ?, ?, ?)
+    `;
+
+    await db.query(query, [date, amount, bank, voucher, users_id]);
+
+
+    res.status(201).json({ message: 'Consignación creada exitosamente'});
+
+  } catch (error) {
+    console.error('Error al insertar consignación:', error);
+    res.status(500).json({ error: 'Error al insertar consignación' });
+  }
+});
+
+
+
 
 // Eliminar un consignments por su ID
  router.delete('/api/amount/:id', async (req, res) => {
