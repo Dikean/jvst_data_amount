@@ -21,6 +21,9 @@ router.get('/api/amount', async (req, res) => {
 
 
 // Ruta para crear una nueva consignación con un archivo adjunto
+const path = require('path');
+const fs = require('fs');
+
 router.post('/api/amount', upload.single('voucher'), async (req, res) => {
   const { date, amount, bank, users_id } = req.body;
   const voucher = req.file; // El archivo adjunto estará disponible en req.file
@@ -31,8 +34,15 @@ router.post('/api/amount', upload.single('voucher'), async (req, res) => {
       return res.status(400).json({ error: 'Debes adjuntar un archivo' });
     }
 
-    // Aquí puedes procesar req.file según tus necesidades, por ejemplo, puedes
-    // acceder a voucher.originalname para obtener el nombre del archivo original.
+    // Almacena el archivo en el directorio 'uploads' en tu servidor
+    const uploadDir = path.join(__dirname, 'uploads');
+    const fileName = `${Date.now()}-${voucher.originalname}`;
+    const filePath = path.join(uploadDir, fileName);
+
+    fs.writeFileSync(filePath, voucher.buffer);
+
+    // Genera la URL para el archivo
+    const fileUrl = `/uploads/${fileName}`;
 
     // Luego, puedes insertar los datos en tu base de datos
     const query = `
@@ -40,7 +50,7 @@ router.post('/api/amount', upload.single('voucher'), async (req, res) => {
       VALUES (?, ?, ?, ?, ?)
     `;
 
-    await db.query(query, [date, amount, bank, voucher.buffer, users_id]);
+    await db.query(query, [date, amount, bank, fileUrl, users_id]);
 
     res.status(201).json({ message: 'Consignación creada exitosamente' });
   } catch (error) {
