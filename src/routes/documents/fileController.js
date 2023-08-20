@@ -42,7 +42,7 @@ router.post('/api/file', upload.single('file'), async (req, res) => {
       return res.status(400).json({ error: 'No se pueden subir más documentos con la misma descripción' });
     }
 
-    // Almacena el archivo en el directorio 'uploads' en tu servidor
+    // Almacena el archivo en el directorio 'data_file' en tu servidor
     const uploadDir = path.join(__dirname, 'data_file'); // Ajusta la ruta según tu estructura
     const fileName = `${Date.now()}-${file.originalname}`;
     const filePath = path.join(uploadDir, fileName);

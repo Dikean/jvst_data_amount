@@ -35,6 +35,7 @@ const fs = require('fs');
 
 // Configura Express para servir archivos estáticos desde la carpeta 'uploads'
 app.use('/uploads', express.static(path.join(__dirname, 'routes/amount/uploads')));
+app.use('/data_file', express.static(path.join(__dirname, 'routes/documents/data_file')));
 
 
 // Rutas
