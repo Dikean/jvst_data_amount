@@ -2,6 +2,7 @@ const { Router } = require('express');
 const db = require('../../db'); // Ajusta la ruta según tu estructura
 const router = Router();
 const multer = require('multer');
+const express = require('express');
 
 // Obtener todos los documentos //ok
 router.get('/api/file', async (req, res) => {
@@ -19,38 +20,48 @@ router.get('/api/file', async (req, res) => {
 const storage = multer.memoryStorage(); // Almacena el archivo en memoria
 const upload = multer({ storage: storage });
 
+// Ruta para crear una nueva consignación con un archivo adjunto
+const path = require('path');
+const fs = require('fs');
+
+
 // Crear un nuevo documento CIS & File
 router.post('/api/file', upload.single('file'), async (req, res) => {
   const { description, date, users_id } = req.body;
   const file = req.file; // El archivo se encuentra en req.file
 
   try {
-    // Verificar si el usuario ya ha subido un documento con la descripción "CIS"
+    // Verificar si el usuario puede subir más documentos con la misma descripción
     const queryCheck = `SELECT COUNT(*) AS documentCount FROM documents WHERE users_id = ? AND description = ?`;
     const [checkResults] = await db.query(queryCheck, [users_id, description]);
 
     const documentCount = checkResults[0].documentCount;
 
-    // Verificar si el usuario puede subir más documentos con la descripción "CIS"
+    // Verificar si el usuario puede subir más documentos con la descripción dada
     if (documentCount >= 1) {
-      return res.status(400).json({ error: 'No se pueden subir más documentos con la descripción CIS' });
+      return res.status(400).json({ error: 'No se pueden subir más documentos con la misma descripción' });
     }
 
-    // Aquí puedes guardar el archivo en tu sistema de archivos o en una base de datos, según tus necesidades.
-    // Por ejemplo, puedes usar la biblioteca fs para guardar el archivo en el sistema de archivos.
-    // Asegúrate de configurar adecuadamente la ubicación de almacenamiento.
+    // Almacena el archivo en el directorio 'uploads' en tu servidor
+    const uploadDir = path.join(__dirname, 'data_file'); // Ajusta la ruta según tu estructura
+    const fileName = `${Date.now()}-${file.originalname}`;
+    const filePath = path.join(uploadDir, fileName);
 
-    // Insertar el nuevo documento en la base de datos con la descripción "CIS"
+    fs.writeFileSync(filePath, file.buffer);
+
+    // Genera la URL para el archivo
+    const fileUrl = `/uploads/${fileName}`;
+
+    // Inserta el nuevo documento en la base de datos
     const query = `INSERT INTO documents (file, date, description, users_id) VALUES (?, ?, ?, ?)`;
-    await db.query(query, [file.buffer, date, description, users_id]);
+    await db.query(query, [fileUrl, date, description, users_id]);
 
-    res.status(201).json({ message: 'Documento CIS creado exitosamente' });
+    res.status(201).json({ message: 'Documento creado exitosamente' });
   } catch (error) {
     console.error('Error en la consulta SQL:', error);
-    res.status(500).json({ error: 'Error al crear el documento CIS', details: error });
+    res.status(500).json({ error: 'Error al crear el documento', details: error });
   }
 });
-
 
 // Eliminar un documento por su ID //ok
 router.delete('/api/file/:id', async (req, res) => {

@@ -63,6 +63,8 @@ router.post('/api/amount', upload.single('voucher'), async (req, res) => {
 });
 
 
+
+
 // Eliminar un consignments por su ID
  router.delete('/api/amount/:id', async (req, res) => {
     const fileId = req.params.id;
