@@ -50,7 +50,7 @@ router.post('/api/file', upload.single('file'), async (req, res) => {
     fs.writeFileSync(filePath, file.buffer);
 
     // Genera la URL para el archivo
-    const fileUrl = `/uploads/${fileName}`;
+    const fileUrl = `/data_file/${fileName}`;
 
     // Inserta el nuevo documento en la base de datos
     const query = `INSERT INTO documents (file, date, description, users_id) VALUES (?, ?, ?, ?)`;
