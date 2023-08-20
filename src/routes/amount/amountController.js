@@ -2,6 +2,10 @@ const { Router } = require('express');
 const db = require('../../db'); // Ajusta la ruta según tu estructura
 const router = Router();
 
+const multer = require('multer');
+const storage = multer.memoryStorage(); // Almacena los archivos en memoria
+const upload = multer({ storage: storage });
+
 // Obtener todos los consignments //ok
 
 router.get('/api/amount', async (req, res) => {
@@ -16,27 +20,34 @@ router.get('/api/amount', async (req, res) => {
 });
 
 
-// Crear un nuevo consignments
-router.post('/api/amount', async (req, res) => {
-  const { date, amount, bank, voucher, users_id } = req.body;
+// Ruta para crear una nueva consignación con un archivo adjunto
+router.post('/api/amount', upload.single('voucher'), async (req, res) => {
+  const { date, amount, bank, users_id } = req.body;
+  const voucher = req.file; // El archivo adjunto estará disponible en req.file
 
   try {
+    // Asegúrate de que req.file contiene el archivo y su contenido
+    if (!voucher) {
+      return res.status(400).json({ error: 'Debes adjuntar un archivo' });
+    }
+
+    // Aquí puedes procesar req.file según tus necesidades, por ejemplo, puedes
+    // acceder a voucher.originalname para obtener el nombre del archivo original.
+
+    // Luego, puedes insertar los datos en tu base de datos
     const query = `
       INSERT INTO consignments (date, amount, bank, voucher, users_id)
       VALUES (?, ?, ?, ?, ?)
     `;
 
-    await db.query(query, [date, amount, bank, voucher, users_id]);
+    await db.query(query, [date, amount, bank, voucher.buffer, users_id]);
 
-
-    res.status(201).json({ message: 'Consignación creada exitosamente'});
-
+    res.status(201).json({ message: 'Consignación creada exitosamente' });
   } catch (error) {
     console.error('Error al insertar consignación:', error);
     res.status(500).json({ error: 'Error al insertar consignación' });
   }
 });
-
 
 
 
