@@ -1,6 +1,8 @@
 const { Router } = require('express');
 const db = require('../../db'); // Ajusta la ruta según tu estructura
 const router = Router();
+const express = require('express');
+const app = express();
 
 const multer = require('multer');
 const storage = multer.memoryStorage(); // Almacena los archivos en memoria
@@ -23,6 +25,7 @@ router.get('/api/amount', async (req, res) => {
 // Ruta para crear una nueva consignación con un archivo adjunto
 const path = require('path');
 const fs = require('fs');
+
 
 router.post('/api/amount', upload.single('voucher'), async (req, res) => {
   const { date, amount, bank, users_id } = req.body;
@@ -58,7 +61,6 @@ router.post('/api/amount', upload.single('voucher'), async (req, res) => {
     res.status(500).json({ error: 'Error al insertar consignación' });
   }
 });
-
 
 
 // Eliminar un consignments por su ID

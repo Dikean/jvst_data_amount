@@ -15,6 +15,7 @@ const referencesController = require('./routes/users/References/referencesContro
 
 const app = express();
 
+
 // Settings
 app.set('port', process.env.PORT || 3000);
 app.set('json spaces', 2);
@@ -27,6 +28,15 @@ app.use(express.json());
 
 // Configurar CORS
 app.use(cors()); // Agrega esta línea para habilitar CORS
+
+// Ruta para crear una nueva consignación con un archivo adjunto
+const path = require('path');
+const fs = require('fs');
+
+// Configura Express para servir archivos estáticos desde la carpeta 'uploads'
+app.use('/uploads', express.static(path.join(__dirname, 'routes/amount/uploads')));
+
+
 // Rutas
 app.use(usersController);
 app.use(fileController);
