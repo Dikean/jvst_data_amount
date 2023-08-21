@@ -115,7 +115,6 @@ router.put('/api/users/:id', async (req, res) => {
   }
 });
 
-
 // Recuperar contraseña
 router.post('/api/forgot-password', async (req, res) => {
   const { email } = req.body;
@@ -166,6 +165,28 @@ router.put('/api/users/:id/change-role', async (req, res) => {
   } catch (error) {
     console.error('Error al actualizar el rol del usuario:', error);
     res.status(500).json({ error: 'Error al actualizar el rol del usuario' });
+  }
+});
+
+// Ruta para obtener datos de un usuario por su ID
+router.get('/api/users/:id', async (req, res) => {
+  const userId = req.params.id;
+
+  try {
+    // Consultar la base de datos para obtener los datos del usuario por su ID
+    const query = 'SELECT * FROM users WHERE id = ?';
+    const [userResults] = await db.query(query, [userId]);
+
+    if (userResults.length === 0) {
+      return res.status(404).json({ error: 'Usuario no encontrado' });
+    }
+
+    // Devolver los datos del usuario encontrado
+    const user = userResults[0];
+    res.status(200).json(user);
+  } catch (error) {
+    console.error('Error al obtener datos de usuario por ID:', error);
+    res.status(500).json({ error: 'Error al obtener datos de usuario por ID' });
   }
 });
 
