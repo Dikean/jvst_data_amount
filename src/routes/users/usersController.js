@@ -85,6 +85,37 @@ router.post('/api/users', async (req, res) => {
   }
 });
 
+// Actualizar datos de un usuario por su ID
+router.put('/api/users/:id', async (req, res) => {
+  const userId = req.params.id;
+  const { name, lastname, address, postal_code, city, country, about_me } = req.body;
+
+  try {
+    // Verificar si el usuario existe
+    const userQuery = 'SELECT * FROM users WHERE id = ?';
+    const [userResult] = await db.query(userQuery, [userId]);
+
+    if (!userResult || userResult.length === 0) {
+      return res.status(404).json({ error: 'Usuario no encontrado' });
+    }
+
+    // Actualizar los campos especificados
+    const updateQuery = `
+      UPDATE users
+      SET name = ?, lastname = ?, address = ?, postal_code = ?, city = ?, country = ?, about_me = ?
+      WHERE id = ?
+    `;
+
+    await db.query(updateQuery, [name, lastname, address, postal_code, city, country, about_me, userId]);
+
+    res.status(200).json({ message: 'Datos de usuario actualizados exitosamente' });
+  } catch (error) {
+    console.error('Error al actualizar datos de usuario:', error);
+    res.status(500).json({ error: 'Error al actualizar datos de usuario' });
+  }
+});
+
+
 // Recuperar contraseña
 router.post('/api/forgot-password', async (req, res) => {
   const { email } = req.body;
