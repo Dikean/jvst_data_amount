@@ -34,7 +34,7 @@ router.delete('/api/references/:id', async (req, res) => {
   try {
     const fileId = req.params.id;
 
-    const query = 'DELETE FROM references WHERE id = ?';
+    const query = 'DELETE FROM `references` WHERE id = ?';
     const [result] = await db.query(query, [fileId]);
 
     if (result.affectedRows === 0) {
@@ -52,7 +52,7 @@ router.delete('/api/references/:id', async (req, res) => {
 router.get('/api/references/:id/references', async (req, res) => {
   try {
     const userId = req.params.id;
-    const query = 'SELECT * FROM references WHERE users_id = ?';
+    const query = 'SELECT * FROM `references` WHERE users_id = ? ';
     
     const [results] = await db.query(query, [userId]);
 
