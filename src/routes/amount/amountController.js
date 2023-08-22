@@ -10,10 +10,25 @@ const upload = multer({ storage: storage });
 
 // Obtener todos los consignments //ok
 
+// router.get('/api/amount', async (req, res) => {
+//   try {
+//     const query = 'SELECT * FROM consignments';
+//     const [results, fields] = await db.query(query); // Utiliza db.promise().query() para trabajar con promesas
+//     res.status(200).json(results);
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ error: 'Error al obtener datos de la base de datos' });
+//   }
+// });
+
 router.get('/api/amount', async (req, res) => {
   try {
-    const query = 'SELECT * FROM consignments';
-    const [results, fields] = await db.query(query); // Utiliza db.promise().query() para trabajar con promesas
+    const query = `
+      SELECT c.*, u.name AS user_name
+      FROM consignments c
+      INNER JOIN users u ON c.users_id = u.id
+    `;
+    const [results, fields] = await db.query(query);
     res.status(200).json(results);
   } catch (error) {
     console.error(error);
@@ -63,8 +78,6 @@ router.post('/api/amount', upload.single('voucher'), async (req, res) => {
 });
 
 
-
-
 // Eliminar un consignments por su ID
  router.delete('/api/amount/:id', async (req, res) => {
     const fileId = req.params.id;
@@ -99,6 +112,33 @@ router.post('/api/amount', upload.single('voucher'), async (req, res) => {
     }
   });
   
+// Obtener consignaciones de un usuario específico por su name
+router.get('/api/amount/user/:name/amount', async (req, res) => {
+  const userName = req.params.name;
+
+  try {
+    // Busca el id del usuario por su name
+    const userIdQuery = 'SELECT id FROM users WHERE name = ?';
+    const [userIdResults] = await db.query(userIdQuery, [userName]);
+
+    if (userIdResults.length === 0) {
+      return res.status(404).json({ error: 'Usuario no encontrado' });
+    }
+
+    const userId = userIdResults[0].id;
+
+    // Obtiene las consignaciones relacionadas con el usuario
+    const consignmentsQuery = 'SELECT * FROM consignments WHERE users_id = ?';
+    const consignments = await db.query(consignmentsQuery, [userId]);
+
+    res.status(200).json(consignments);
+  } catch (error) {
+    console.error('Error en la consulta SQL:', error);
+    res.status(500).json({ error: 'Error al obtener datos de la base de datos', details: error });
+  }
+});
+
+
 
  // Obtener la suma total de los montos de consignaciones de Bancolombia //ok
  router.get('/api/amount/bancolombia/total', async (req, res) => {

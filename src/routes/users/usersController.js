@@ -99,14 +99,13 @@ router.put('/api/users/:id', async (req, res) => {
       return res.status(404).json({ error: 'Usuario no encontrado' });
     }
 
-    // Actualizar los campos especificados
     const updateQuery = `
-      UPDATE users
-      SET name = ?, lastname = ?, address = ?, postal_code = ?, city = ?, country = ?, about_me = ?
-      WHERE id = ?
-    `;
+  UPDATE users
+  SET name = ?, lastname = ?, address = ?, postal_code = ?, city = ?, country = ?, about_me = ?
+  WHERE id = ?
+`;
 
-    await db.query(updateQuery, [name, lastname, address, postal_code, city, country, about_me, userId]);
+await db.query(updateQuery, [name, lastname, address, postal_code, city, country, about_me, userId]);
 
     res.status(200).json({ message: 'Datos de usuario actualizados exitosamente' });
   } catch (error) {
