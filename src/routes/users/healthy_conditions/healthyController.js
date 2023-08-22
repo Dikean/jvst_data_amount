@@ -63,6 +63,35 @@ router.get('/api/healthy/:id/healthy', async (req, res) => {
   }
 });
 
+// Actualizar datos de salud de un usuario por su ID
+router.put('/api/users/:userId/healthy', async (req, res) => {
+  const userId = req.params.userId;
+  const { alergia, enfermedad, prescripcionMedica, incapacidad, RestriccionAlimenticia } = req.body;
+
+  try {
+    // Verificar si el usuario existe (puedes agregar esta verificación si es necesario)
+    const userQuery = 'SELECT * FROM users WHERE id = ?';
+    const [userResult] = await db.query(userQuery, [userId]);
+
+    if (!userResult || userResult.length === 0) {
+      return res.status(404).json({ error: 'Usuario no encontrado' });
+    }
+
+    const updateQuery = `
+      UPDATE healthy_conditions
+      SET alergia = ?, enfermedad = ?, prescripcionMedica = ?, incapacidad = ?, RestriccionAlimenticia = ?
+      WHERE users_id = ?
+    `;
+
+    await db.query(updateQuery, [alergia, enfermedad, prescripcionMedica, incapacidad, RestriccionAlimenticia, userId]);
+
+    res.status(200).json({ message: 'Datos de salud del usuario actualizados exitosamente' });
+  } catch (error) {
+    console.error('Error al actualizar datos de salud del usuario:', error);
+    res.status(500).json({ error: 'Error al actualizar datos de salud del usuario' });
+  }
+});
+
 
 
 module.exports = router;
