@@ -113,6 +113,7 @@ router.post('/api/amount', upload.single('voucher'), async (req, res) => {
   });
   
 // Obtener consignaciones de un usuario específico por su name
+// Obtener consignaciones de un usuario específico por su name
 router.get('/api/amount/user/:name/amount', async (req, res) => {
   const userName = req.params.name;
 
@@ -128,8 +129,20 @@ router.get('/api/amount/user/:name/amount', async (req, res) => {
     const userId = userIdResults[0].id;
 
     // Obtiene las consignaciones relacionadas con el usuario
-    const consignmentsQuery = 'SELECT * FROM consignments WHERE users_id = ?';
-    const consignments = await db.query(consignmentsQuery, [userId]);
+    const consignmentsQuery = 'SELECT id, date, amount, bank, voucher, users_id FROM consignments WHERE users_id = ?';
+    const [consignmentsResults] = await db.query(consignmentsQuery, [userId]);
+
+    // Convierte los resultados en objetos JSON
+    const consignments = consignmentsResults.map((row) => {
+      return {
+        id: row.id,
+        date: row.date,
+        amount: row.amount,
+        bank: row.bank,
+        voucher: row.voucher,
+        users_id: row.users_id,
+      };
+    });
 
     res.status(200).json(consignments);
   } catch (error) {
