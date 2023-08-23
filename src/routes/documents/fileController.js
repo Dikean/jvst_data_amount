@@ -81,6 +81,28 @@ router.delete('/api/file/:id', async (req, res) => {
     res.status(500).json({ error: 'Error al eliminar el documento', details: error });
   }
 });
+
+// Eliminar un documento por su ID //ok
+router.delete('/api/file/:userId/files', async (req, res) => {
+  const userId = req.params.userId;
+  const descriptionsToDelete = ["file1", "file2", "file3", "file4", "file5"];
+
+  try {
+    // Eliminar todos los documentos del usuario con las descripciones especificadas.
+    const query = 'DELETE FROM documents WHERE users_id = ? AND description IN (?)';
+    const result = await db.query(query, [userId, descriptionsToDelete]);
+
+    if (result[0].affectedRows === 0) {
+      res.status(404).json({ error: 'No se encontraron documentos para eliminar' });
+    } else {
+      res.status(200).json({ message: 'Documentos eliminados exitosamente' });
+    }
+  } catch (error) {
+    console.error('Error en la consulta SQL:', error);
+    res.status(500).json({ error: 'Error al eliminar los documentos', details: error });
+  }
+});
+
   
   // Obtener documentos de un usuario específico
 router.get('/api/file/:id/file', async(req, res) => {
