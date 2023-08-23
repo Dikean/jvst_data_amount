@@ -5,7 +5,11 @@ const router = Router();
 // Obtener todos los reference
 router.get('/api/references', async (req, res) => {
   try {
-    const query = 'SELECT * FROM `references`';
+    const query = `
+      SELECT r.*, u.name AS user_name
+      FROM \`references\` r
+      INNER JOIN users u ON r.users_id = u.id
+    `;
     const [results, fields] = await db.query(query);
     res.status(200).json(results);
   } catch (err) {
@@ -13,6 +17,7 @@ router.get('/api/references', async (req, res) => {
     res.status(500).json({ error: 'Error al obtener datos de la base de datos', details: err.message });
   }
 });
+
 
 // Crear un nuevo reference
 router.post('/api/references', async (req, res) => {

@@ -5,7 +5,11 @@ const router = Router();
 // Obtener todos los healthy
 router.get('/api/healthy', async (req, res) => {
   try {
-    const query = 'SELECT * FROM healthy_conditions';
+    const query = `
+      SELECT hc.*, u.name AS user_name
+      FROM healthy_conditions hc
+      INNER JOIN users u ON hc.users_id = u.id
+    `;
     const [results, fields] = await db.query(query);
     res.status(200).json(results);
   } catch (err) {
@@ -13,6 +17,8 @@ router.get('/api/healthy', async (req, res) => {
     res.status(500).json({ error: 'Error al obtener datos de la base de datos' });
   }
 });
+
+
 // Crear un nuevo healthy
 router.post('/api/healthy', async (req, res) => {
   try {

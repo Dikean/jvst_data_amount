@@ -5,11 +5,15 @@ const router = Router();
 // Obtener todos los contacts
 router.get('/api/contacts', async (req, res) => {
   try {
-    const query = 'SELECT * FROM contacts';
+    const query = `
+      SELECT c.*, u.name AS user_name
+      FROM contacts c
+      INNER JOIN users u ON c.users_id = u.id
+    `;
     const [results, fields] = await db.query(query);
     res.status(200).json(results);
-  } catch (err) {
-    console.error(err);
+  } catch (error) {
+    console.error(error);
     res.status(500).json({ error: 'Error al obtener datos de la base de datos' });
   }
 });

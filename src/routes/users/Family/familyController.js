@@ -5,7 +5,11 @@ const router = Router();
 // Obtener todos los family
 router.get('/api/family', async (req, res) => {
   try {
-    const query = 'SELECT * FROM family_infos';
+    const query = `
+      SELECT fi.*, u.name AS user_name
+      FROM family_infos fi
+      INNER JOIN users u ON fi.users_id = u.id
+    `;
     const [results, fields] = await db.query(query);
     res.status(200).json(results);
   } catch (err) {
@@ -13,6 +17,7 @@ router.get('/api/family', async (req, res) => {
     res.status(500).json({ error: 'Error al obtener datos de la base de datos' });
   }
 });
+
 
 // Crear un nuevo family
 // Crear un nuevo family

@@ -7,14 +7,19 @@ const express = require('express');
 // Obtener todos los documentos //ok
 router.get('/api/file', async (req, res) => {
   try {
-    const query = 'SELECT * FROM documents';
-    const [results, fields] = await db.query(query); // Utiliza db.promise().query() para trabajar con promesas
+    const query = `
+      SELECT d.*, u.name AS user_name
+      FROM documents d
+      INNER JOIN users u ON d.users_id = u.id
+    `;
+    const [results, fields] = await db.query(query);
     res.status(200).json(results);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Error al obtener datos de la base de datos' });
   }
 });
+
 
 // Configura multer para manejar la carga de archivos
 const storage = multer.memoryStorage(); // Almacena el archivo en memoria
@@ -120,7 +125,12 @@ router.get('/api/file/:id/file', async(req, res) => {
   // Obtener documentos de un usuario específico con la descripción "CIS" //ok
   router.get('/api/file/:id/file/cis', async (req, res) => {
     const userId = req.params.id;
-    const query = 'SELECT * FROM documents WHERE users_id = ? AND description = "CIS"';
+    const query = `
+      SELECT d.*, u.name AS user_name
+      FROM documents d
+      INNER JOIN users u ON d.users_id = u.id
+      WHERE d.users_id = ? AND d.description = "CIS"
+    `;
     try {
       const [results] = await db.query(query, [userId]);
       if (results.length === 0) {
@@ -132,6 +142,7 @@ router.get('/api/file/:id/file', async(req, res) => {
       res.status(500).json({ error: 'Error al obtener datos de la base de datos' });
     }
   });
+  
 
     // Obtener documentos con la descripción "CIS" //ok
   router.get('/api/files/cis', async (req, res) => {
