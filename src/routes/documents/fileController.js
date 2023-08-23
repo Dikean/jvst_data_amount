@@ -144,21 +144,26 @@ router.get('/api/file/:id/file', async(req, res) => {
   });
   
 
-    // Obtener documentos con la descripción "CIS" //ok
-  router.get('/api/files/cis', async (req, res) => {
-    const query = 'SELECT * FROM documents WHERE description = "CIS"';
-    try {
-      const [results] = await db.query(query);
-      if (results.length === 0) {
-        return res.status(200).json({ message: 'No documents found with description "CIS"' });
-      }
-      res.status(200).json(results);
-    } catch (error) {
-      console.error('Error fetching data from the database:', error);
-      res.status(500).json({ error: 'Error fetching data from the database' });
+  // Obtener documentos con la descripción "CIS" y el nombre del usuario
+router.get('/api/files/cis', async (req, res) => {
+  const query = `
+    SELECT d.*, u.name AS user_name
+    FROM documents d
+    INNER JOIN users u ON d.users_id = u.id
+    WHERE d.description = "CIS"
+  `;
+  try {
+    const [results] = await db.query(query);
+    if (results.length === 0) {
+      return res.status(200).json({ message: 'No documents found with description "CIS"' });
     }
-  });
-  
+    res.status(200).json(results);
+  } catch (error) {
+    console.error('Error fetching data from the database:', error);
+    res.status(500).json({ error: 'Error fetching data from the database' });
+  }
+});
+
 
 
 // Obtener documentos de un usuario específico con descripciones en el conjunto ["file01", "file02", "file03", "file04", "file05"]
