@@ -131,7 +131,7 @@ router.get('/api/file/:id/file', async(req, res) => {
 // Obtener documentos de un usuario específico con descripciones en el conjunto ["file01", "file02", "file03", "file04", "file05"]
 router.get('/api/file/:id/files', async (req, res) => {
   const userId = req.params.id;
-  const descriptions = ["file1", "file2", "file3", "file04", "file5"];
+  const descriptions = ["file1", "file2", "file3", "file4", "file5"];
 
   // Crear un marcador de posición para cada descripción en el array.
   const placeholders = descriptions.map(() => '?').join(',');
