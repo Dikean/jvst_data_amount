@@ -128,48 +128,29 @@ router.get('/api/file/:id/file', async(req, res) => {
   
 
 
+// Obtener documentos de un usuario específico con descripciones en el conjunto ["file01", "file02", "file03", "file04", "file05"]
+router.get('/api/file/:id/files', async (req, res) => {
+  const userId = req.params.id;
+  const descriptions = ["file1", "file2", "file3", "file04", "file5"];
 
-   // Obtener documentos de un usuario específico con la descripción "File" //ok
-   router.get('/api/file/:id/files', async (req, res) => {
-    const userId = req.params.id;
-    const descriptions = ["File1", "File2", "File3", "File4", "File5"];
-  
-    try {
-      const filesData = await Promise.all(
-        descriptions.map(async (description) => {
-          const query = `
-            SELECT 
-              file
-            FROM 
-              documents 
-            WHERE 
-              description = ? 
-              AND users_id = ?
-            ORDER BY 
-              date DESC
-            LIMIT 1`;
-            
-          const [results] = await db.query(query, [description, userId]);
-          const fileData = results[0];
-          const url = `blob:${process.env.CLIENT_URL}/${fileData.file}`; // Assuming CLIENT_URL is your client's URL
-          return { url, date: fileData.date };
-        })
-      );
-  
-      const responseData = {
-        files: filesData,
-        date: new Date().toISOString().split('T')[0],
-        users_id: userId,
-      };
-  
-      res.status(200).json(responseData);
-    } catch (error) {
-      console.error('Error al obtener archivos de la base de datos:', error);
-      res.status(500).json({ error: 'Error al obtener archivos de la base de datos' });
+  // Crear un marcador de posición para cada descripción en el array.
+  const placeholders = descriptions.map(() => '?').join(',');
+
+  // Consulta SQL con los marcadores de posición para las descripciones.
+  const query = `SELECT * FROM documents WHERE users_id = ? AND description IN (${placeholders})`;
+
+  try {
+    const [results] = await db.query(query, [userId, ...descriptions]);
+    if (results.length === 0) {
+      return res.status(200).json({ message: 'Usuario no existe o no hay documentos con esas descripciones' });
     }
-  });
-  
-  
+    res.status(200).json(results);
+  } catch (error) {
+    console.error('Error al obtener datos de la base de datos:', error);
+    res.status(500).json({ error: 'Error al obtener datos de la base de datos' });
+  }
+});
+
 
 
 
