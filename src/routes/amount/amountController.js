@@ -113,27 +113,21 @@ router.post('/api/amount', upload.single('voucher'), async (req, res) => {
   });
   
 // Obtener consignaciones de un usuario específico por su name
-// Obtener consignaciones de un usuario específico por su name
 router.get('/api/amount/user/:name/amount', async (req, res) => {
   const userName = req.params.name;
 
   try {
-    // Busca el id del usuario por su name
-    const userIdQuery = 'SELECT id FROM users WHERE name = ?';
-    const [userIdResults] = await db.query(userIdQuery, [userName]);
-
-    if (userIdResults.length === 0) {
-      return res.status(404).json({ error: 'Usuario no encontrado' });
-    }
-
-    const userId = userIdResults[0].id;
-
-    // Obtiene las consignaciones relacionadas con el usuario
-    const consignmentsQuery = 'SELECT id, date, amount, bank, voucher, users_id FROM consignments WHERE users_id = ?';
-    const [consignmentsResults] = await db.query(consignmentsQuery, [userId]);
+    // Busca las consignaciones relacionadas con el usuario por su nombre
+    const query = `
+      SELECT c.id, c.date, c.amount, c.bank, c.voucher, c.users_id, u.name AS user_name
+      FROM consignments c
+      INNER JOIN users u ON c.users_id = u.id
+      WHERE u.name = ?
+    `;
+    const [results] = await db.query(query, [userName]);
 
     // Convierte los resultados en objetos JSON
-    const consignments = consignmentsResults.map((row) => {
+    const consignments = results.map((row) => {
       return {
         id: row.id,
         date: row.date,
@@ -141,6 +135,7 @@ router.get('/api/amount/user/:name/amount', async (req, res) => {
         bank: row.bank,
         voucher: row.voucher,
         users_id: row.users_id,
+        user_name: row.user_name, // Incluye el nombre del usuario en la respuesta
       };
     });
 
@@ -150,6 +145,7 @@ router.get('/api/amount/user/:name/amount', async (req, res) => {
     res.status(500).json({ error: 'Error al obtener datos de la base de datos', details: error });
   }
 });
+
 
 
 
