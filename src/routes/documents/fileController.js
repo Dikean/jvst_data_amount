@@ -164,7 +164,7 @@ router.get('/api/files/cis', async (req, res) => {
   }
 });
 
-// Obtener documentos de un usuario específico por su nombre //search
+// Obtener documentos de un usuario específico por su nombre //seaarch
 router.get('/api/files/cis/user/:name', async (req, res) => {
   const userName = req.params.name;
 
@@ -182,6 +182,7 @@ router.get('/api/files/cis/user/:name', async (req, res) => {
     const userDocuments = results.map((row) => {
       return {
         id: row.id,
+        date: row.date,
         description: row.description,
         file: row.file,
         users_id: row.users_id,
