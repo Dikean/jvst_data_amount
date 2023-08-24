@@ -53,7 +53,6 @@ router.get('/api/users', async (req, res) => {
   }
 });
 
-
 // Ruta para crear un nuevo usuario
 router.post('/api/users', async (req, res) => {
   const { name, lastname, email, password, role, address, postal_code, city, country, date, about_me } = req.body;

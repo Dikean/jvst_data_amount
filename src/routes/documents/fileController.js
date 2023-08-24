@@ -164,6 +164,37 @@ router.get('/api/files/cis', async (req, res) => {
   }
 });
 
+// Obtener documentos de un usuario específico por su nombre //search
+router.get('/api/files/cis/user/:name', async (req, res) => {
+  const userName = req.params.name;
+
+  try {
+    // Consulta para buscar documentos relacionados con el usuario por su nombre
+    const query = `
+      SELECT d.*, u.name AS user_name
+      FROM documents d
+      INNER JOIN users u ON d.users_id = u.id
+      WHERE u.name = ?
+    `;
+    const [results] = await db.query(query, [userName]);
+
+    // Convierte los resultados en objetos JSON
+    const userDocuments = results.map((row) => {
+      return {
+        id: row.id,
+        description: row.description,
+        file: row.file,
+        users_id: row.users_id,
+        user_name: row.user_name, // Incluye el nombre del usuario en la respuesta
+      };
+    });
+
+    res.status(200).json(userDocuments);
+  } catch (error) {
+    console.error('Error en la consulta SQL:', error);
+    res.status(500).json({ error: 'Error al obtener datos de la base de datos', details: error });
+  }
+});
 
 
 // Obtener documentos de un usuario específico con descripciones en el conjunto ["file01", "file02", "file03", "file04", "file05"]
@@ -189,6 +220,32 @@ router.get('/api/file/:id/files', async (req, res) => {
   }
 });
 
+// Obtener documentos de un usuario específico por su nombre y descripciones // search
+router.get('/api/files/documents/user/:name', async (req, res) => {
+  const userName = req.params.name;
+  const descriptions = ["file1", "file2", "file3", "file4", "file5"];
+
+  // Crear un marcador de posición para cada descripción en el array.
+  const placeholders = descriptions.map(() => '?').join(',');
+
+  // Consulta SQL con los marcadores de posición para las descripciones.
+  const query = `
+    SELECT d.*, u.name AS user_name
+    FROM documents d
+    INNER JOIN users u ON d.users_id = u.id
+    WHERE u.name = ? AND d.description IN (${placeholders})
+  `;
+
+  try {
+    const [results] = await db.query(query, [userName, ...descriptions]);
+    
+      return res.status(200).json(results);
+
+  } catch (error) {
+    console.error('Error al obtener datos de la base de datos:', error);
+    res.status(500).json({ error: 'Error al obtener datos de la base de datos' });
+  }
+});
 
 
 
