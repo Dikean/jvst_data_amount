@@ -5,20 +5,28 @@ const multer = require('multer');
 const express = require('express');
 
 // Obtener todos los documentos //ok
-router.get('/api/file', async (req, res) => {
+// Obtener todos los documentos con descripciones en el conjunto ["file1", "file2", "file3", "file4", "file5"]
+router.get('/api/files/documents', async (req, res) => {
   try {
+    const descriptions = ["file1", "file2", "file3", "file4", "file5"];
+    // Crear un marcador de posición para cada descripción en el array.
+    const placeholders = descriptions.map(() => '?').join(',');
+
     const query = `
       SELECT d.*, u.name AS user_name
       FROM documents d
       INNER JOIN users u ON d.users_id = u.id
+      WHERE d.description IN (${placeholders})
     `;
-    const [results, fields] = await db.query(query);
+    const [results, fields] = await db.query(query, descriptions);
     res.status(200).json(results);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Error al obtener datos de la base de datos' });
   }
 });
+
+
 
 
 // Configura multer para manejar la carga de archivos
