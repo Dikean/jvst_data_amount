@@ -197,15 +197,15 @@ router.get('/api/users/byname/:name', async (req, res) => {
     // Consultar la base de datos para obtener los datos del usuario por su nombre
     const query = 'SELECT * FROM users WHERE name = ?';
     const [userResults] = await db.query(query, [userName]);
-    // Devolver los datos del usuario encontrado
-    const user = userResults[0];
-    res.status(200).json(user);
+ 
+    res.status(200).json(userResults);
   } catch (error) {
     console.error('Error al obtener datos de usuario por nombre:', error);
     res.status(500).json({ error: 'Error al obtener datos de usuario por nombre' });
   }
 });
-///ejamplo
+
+
 
 
 
