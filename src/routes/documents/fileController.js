@@ -162,9 +162,6 @@ router.get('/api/files/cis', async (req, res) => {
   `;
   try {
     const [results] = await db.query(query);
-    if (results.length === 0) {
-      return res.status(200).json({ message: 'No documents found with description "CIS"' });
-    }
     res.status(200).json(results);
   } catch (error) {
     console.error('Error fetching data from the database:', error);

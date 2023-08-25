@@ -136,14 +136,14 @@ router.post('/api/forgot-password', async (req, res) => {
       from: 'dylan01aponte@gmail.com',
       to: email,
       subject: 'Recuperación de contraseña',
-      text: `Tu nueva contraseña temporal es: ${tempPassword}`
+      text: `Tu nueva contraseña es: ${tempPassword}`
     };
 
     const mailInfo = await transporter.sendMail(mailOptions);
 
     console.log('Correo electrónico enviado:', mailInfo); // Muestra información sobre el correo enviado
 
-    res.status(200).json({ message: 'Contraseña temporal enviada exitosamente por correo electrónico' });
+    res.status(200).json({ message: 'Contraseña enviada exitosamente por correo electrónico' });
   } catch (error) {
     console.error('Error en el proceso de recuperación de contraseña:', error);
     res.status(500).json({ error: 'Error en el proceso de recuperación de contraseña' });
