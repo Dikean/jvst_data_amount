@@ -197,11 +197,6 @@ router.get('/api/users/byname/:name', async (req, res) => {
     // Consultar la base de datos para obtener los datos del usuario por su nombre
     const query = 'SELECT * FROM users WHERE name = ?';
     const [userResults] = await db.query(query, [userName]);
-
-    if (userResults.length === 0) {
-      return res.status(404).json({ error: 'Usuario no encontrado' });
-    }
-
     // Devolver los datos del usuario encontrado
     const user = userResults[0];
     res.status(200).json(user);
@@ -210,6 +205,7 @@ router.get('/api/users/byname/:name', async (req, res) => {
     res.status(500).json({ error: 'Error al obtener datos de usuario por nombre' });
   }
 });
+///ejamplo
 
 
 
