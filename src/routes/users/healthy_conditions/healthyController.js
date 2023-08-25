@@ -98,6 +98,29 @@ router.put('/api/users/:userId/healthy', async (req, res) => {
   }
 });
 
+// Ruta para obtener datos de todas las condiciones de salud por su nombre
+router.get('/api/healthy/byname/:name', async (req, res) => {
+  const userName = req.params.name;
+
+  try {
+    // Consultar la base de datos para obtener los datos de las condiciones de salud por su nombre
+    const query = `
+      SELECT hc.*, u.name AS user_name
+      FROM healthy_conditions hc
+      INNER JOIN users u ON hc.users_id = u.id
+      WHERE u.name = ?;
+    `;
+    const [healthyResults] = await db.query(query, [userName]);
+
+   
+
+    // Devolver los datos de las condiciones de salud encontradas
+    res.status(200).json(healthyResults);
+  } catch (error) {
+    console.error('Error al obtener datos de condiciones de salud por nombre:', error);
+    res.status(500).json({ error: 'Error al obtener datos de condiciones de salud por nombre' });
+  }
+});
 
 
 module.exports = router;

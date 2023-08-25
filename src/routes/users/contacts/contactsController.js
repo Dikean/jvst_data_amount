@@ -67,5 +67,29 @@ router.get('/api/contacts/:id/contacts', async (req, res) => {
 });
 
 
+// Ruta para obtener datos de todos los contactos por su nombre
+router.get('/api/contacts/byname/:name', async (req, res) => {
+  const contactName = req.params.name;
+
+  try {
+    // Consultar la base de datos para obtener los datos de los contactos por su nombre
+    const query = `
+      SELECT c.*, u.name AS user_name
+      FROM contacts c
+      INNER JOIN users u ON c.users_id = u.id
+      WHERE u.name = ?;
+    `;
+    const [contactResults] = await db.query(query, [contactName]);
+
+    // Devolver los datos de los contactos encontrados
+    res.status(200).json(contactResults);
+  } catch (error) {
+    console.error('Error al obtener datos de contactos por nombre:', error);
+    res.status(500).json({ error: 'Error al obtener datos de contactos por nombre' });
+  }
+});
+
+
+
 module.exports = router;
 

@@ -68,6 +68,26 @@ router.get('/api/references/:id/references', async (req, res) => {
   }
 });
 
+// Ruta para obtener datos de todas las referencias por su nombre de usuario
+router.get('/api/references/byname/:name', async (req, res) => {
+  const userName = req.params.name;
+
+  try {
+    // Consultar la base de datos para obtener los datos de las referencias por su nombre de usuario
+    const query = `
+      SELECT r.*, u.name AS user_name
+      FROM \`references\` r
+      INNER JOIN users u ON r.users_id = u.id
+      WHERE u.name = ?;
+    `;
+    const [referenceResults] = await db.query(query, [userName]);
+    // Devolver los datos de las referencias encontradas
+    res.status(200).json(referenceResults);
+  } catch (error) {
+    console.error('Error al obtener datos de referencias por nombre de usuario:', error);
+    res.status(500).json({ error: 'Error al obtener datos de referencias por nombre de usuario' });
+  }
+});
 
 
 module.exports = router;

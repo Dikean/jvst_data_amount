@@ -81,6 +81,27 @@ router.get('/api/family/:id/family', async (req, res) => {
   }
 });
 
+// Ruta para obtener datos de todos los family por su nombre
+router.get('/api/family/byname/:name', async (req, res) => {
+  const userName = req.params.name;
+
+  try {
+    // Consultar la base de datos para obtener los datos de los family por su nombre
+    const query = `
+      SELECT fi.*, u.name AS user_name
+      FROM family_infos fi
+      INNER JOIN users u ON fi.users_id = u.id
+      WHERE u.name = ?;
+    `;
+    const [familyResults] = await db.query(query, [userName]);
+
+    // Devolver los datos de family encontrados
+    res.status(200).json(familyResults);
+  } catch (error) {
+    console.error('Error al obtener datos de family por nombre:', error);
+    res.status(500).json({ error: 'Error al obtener datos de family por nombre' });
+  }
+});
 
 
 module.exports = router;
