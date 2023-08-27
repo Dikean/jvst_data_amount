@@ -5,9 +5,9 @@ const app = express();
 // Configuración de la base de datos
 const pool = mysql.createPool({
   host: 'smilesonline.online', // Cambia esto por tu host
-  user: 'u958352070_Dylan_c',    // Cambia esto por tu usuario
-  password: '1y3uXSrn&V',     // Cambia esto por tu contraseña
-  database: 'u958352070_jvst', // Cambia esto por tu base de datos
+  user: 'u958352070_jvst_user',    // Cambia esto por tu usuario
+  password: '^35P>b$Ir5V',     // Cambia esto por tu contraseña
+  database: 'u958352070_jvst_database', // Cambia esto por tu base de datos
   connectionLimit: 10, // Número máximo de conexiones en el pool
 });
 
