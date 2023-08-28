@@ -1,8 +1,8 @@
 # Dependencias
 node_modules/
 
-src/routes/amount/uploads/
-src/routes/documents/data_file/
+# src/routes/amount/uploads/
+# src/routes/documents/data_file/
 
 # Archivos de configuración local
 .env

@@ -8,12 +8,33 @@ const router = Router();
 const nodemailer = require('nodemailer'); // Para enviar correos electrónicos
 const randomstring = require('randomstring'); // Para generar una contraseña temporal
 
+
+const Redis = require('ioredis'); // Importa la biblioteca de cliente Redis
+const redis = new Redis(); // Crea una instancia de cliente Redis
+
 // Ruta para iniciar sesión
 router.post('/api/auth', async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    // Busca al usuario en la base de datos por su correo electrónico
+    // Verificar si los datos del usuario están en caché
+    const cachedUser = await redis.get(email);
+    if (cachedUser) {
+      const user = JSON.parse(cachedUser);
+      const isPasswordValid = await bcrypt.compare(password, user.password);
+
+      if (!isPasswordValid) {
+        return res.status(401).json({ error: 'Credenciales incorrectas' });
+      }
+
+      const token = jwt.sign({ id: user.id, name: user.name, email: user.email, role: user.role }, 'tu_secreto_secreto', {
+        expiresIn: '3h',
+      });
+
+      return res.status(200).json({ message: 'Inicio de sesión exitoso', user, token });
+    }
+
+    // Si los datos del usuario no están en caché, consulta la base de datos
     const userQuery = 'SELECT * FROM users WHERE email = ?';
     const [userResults] = await db.query(userQuery, [email]);
 
@@ -21,7 +42,6 @@ router.post('/api/auth', async (req, res) => {
       return res.status(401).json({ error: 'Credenciales incorrectas' });
     }
 
-    // Compara la contraseña proporcionada con la almacenada en la base de datos
     const user = userResults[0];
     const isPasswordValid = await bcrypt.compare(password, user.password);
 
@@ -29,9 +49,11 @@ router.post('/api/auth', async (req, res) => {
       return res.status(401).json({ error: 'Credenciales incorrectas' });
     }
 
-    // Genera un token JWT para el usuario
-    const token = jwt.sign({ id: user.id,name: user.name, email: user.email , role: user.role}, 'tu_secreto_secreto', {
-      expiresIn: '3h', // Puedes ajustar la duración del token
+    // Almacena los datos del usuario en caché
+    await redis.set(email, JSON.stringify(user), 'EX', 3600); // Caducidad de 1 hora
+
+    const token = jwt.sign({ id: user.id, name: user.name, email: user.email, role: user.role }, 'tu_secreto_secreto', {
+      expiresIn: '3h',
     });
 
     res.status(200).json({ message: 'Inicio de sesión exitoso', user, token });
